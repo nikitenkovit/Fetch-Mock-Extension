@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Swap Request</title>
+		<link rel="stylesheet" href="popup.css" />
+	</head>
+	<body>
+		<div class="container">
+			<label for="path">PATH:</label>
+			<input type="text" id="path" placeholder="Введите часть пути URL" />
+
+			<label for="data">DATA:</label>
+			<textarea id="data" placeholder="Введите mock-данные"></textarea>
+
+			<label for="isActive">Активировать перехват:</label>
+			<input type="radio" id="isActive" name="isActive" />
+
+			<button id="save">Сохранить</button>
+		</div>
+		<script src="popup.js"></script>
+	</body>
+</html>
