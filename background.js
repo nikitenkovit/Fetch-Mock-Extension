@@ -32,7 +32,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 					mockData,
 					isActive,
 				});
-				injectContentScript();
+				injectContentScript(mockPath, mockData);
 			}
 		);
 	} else if (message.action === 'deactivate') {
@@ -44,7 +44,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 // Внедрение content script на активную вкладку
-async function injectContentScript() {
+async function injectContentScript(mockPath, mockData) {
 	try {
 		const [tab] = await chrome.tabs.query({
 			active: true,
@@ -53,7 +53,9 @@ async function injectContentScript() {
 		if (tab) {
 			await chrome.scripting.executeScript({
 				target: { tabId: tab.id },
-				files: ['content.js'],
+				func: overrideFetch,
+				args: [mockPath, mockData], // Передаем данные в функцию
+				world: 'MAIN', // Внедряем в контекст страницы
 			});
 			console.log('Content script успешно внедрен на вкладку:', tab.url);
 		} else {
@@ -62,4 +64,36 @@ async function injectContentScript() {
 	} catch (error) {
 		console.error('Ошибка при внедрении content script:', error);
 	}
+}
+
+// Функция для переопределения fetch
+function overrideFetch(mockPath, mockData) {
+	console.log('Перехват fetch-запросов активирован.');
+	console.log('Данные из хранилища:', { mockPath, mockData });
+
+	// Сохраняем оригинальный fetch
+	const originalFetch = window.fetch;
+
+	// Переопределяем fetch
+	window.fetch = async (input, init) => {
+		const url = typeof input === 'string' ? input : input.url;
+		console.log('Обнаружен fetch-запрос:', url);
+
+		// Проверяем, содержит ли URL часть, указанную в mockPath
+		if (mockPath && url.includes(mockPath)) {
+			console.log('Перехвачен запрос:', url);
+			console.log('Возвращаем mock-данные:', mockData);
+			return new Response(mockData, {
+				status: 200,
+				headers: { 'Content-Type': 'application/json' },
+			});
+		}
+
+		// Если запрос не должен быть перехвачен, выполняем оригинальный fetch
+		console.log('Запрос не перехвачен, выполняется оригинальный fetch.');
+		return originalFetch(input, init);
+	};
+
+	// Проверка, что fetch переопределен
+	console.log('window.fetch переопределен:', window.fetch !== originalFetch);
 }
