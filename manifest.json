@@ -1,8 +1,8 @@
 {
 	"manifest_version": 3,
 	"name": "Swap Request",
-	"version": "1.2",
-	"description": "Перехват fetch-запросов и возврат mock-данных.",
+	"version": "1.5.0",
+	"description": "Перехват fetch-запросов и возврат mock-данных",
 	"permissions": ["storage", "scripting", "activeTab"],
 	"host_permissions": ["<all_urls>"],
 	"background": {

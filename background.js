@@ -22,8 +22,19 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 		isActive = true;
 		mockPath = message.path;
 		mockData = message.data;
-		console.log('Активирован перехват запросов:', { mockPath, mockData });
-		injectContentScript();
+
+		// Сохраняем данные в хранилище
+		chrome.storage.local.set(
+			{ path: mockPath, data: mockData, isActive },
+			() => {
+				console.log('Данные сохранены в хранилище:', {
+					mockPath,
+					mockData,
+					isActive,
+				});
+				injectContentScript();
+			}
+		);
 	} else if (message.action === 'deactivate') {
 		isActive = false;
 		mockPath = '';
