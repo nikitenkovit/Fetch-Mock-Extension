@@ -8,20 +8,30 @@ chrome.storage.local.get(['path', 'data', 'isActive'], (result) => {
 	console.log('Данные загружены в popup:', result);
 });
 
-// Сохранение данных при нажатии на кнопку
-document.getElementById('save').addEventListener('click', () => {
+// Переключение состояния радиокнопки
+document.getElementById('isActive').addEventListener('change', (event) => {
+	const isActive = event.target.checked; // Используем текущее значение радиокнопки
 	const path = document.getElementById('path').value;
 	const data = document.getElementById('data').value;
-	const isActive = document.getElementById('isActive').checked;
 
-	console.log('Сохранение данных:', { path, data, isActive });
+	console.log('Состояние радиокнопки изменено:', isActive);
 
+	// Сохраняем данные в хранилище
 	chrome.storage.local.set({ path, data, isActive }, () => {
-		console.log('Данные сохранены в хранилище.');
+		console.log('Данные сохранены в хранилище:', { path, data, isActive });
 		chrome.runtime.sendMessage({
 			action: isActive ? 'activate' : 'deactivate',
 			path,
 			data,
 		});
 	});
+});
+
+// Синхронизация состояния радиокнопки при изменении хранилища
+chrome.storage.onChanged.addListener((changes, area) => {
+	if (area === 'local' && changes.isActive) {
+		const isActive = changes.isActive.newValue;
+		console.log('Состояние isActive изменено в хранилище:', isActive);
+		document.getElementById('isActive').checked = isActive;
+	}
 });
